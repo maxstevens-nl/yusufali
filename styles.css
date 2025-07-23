@@ -51,7 +51,7 @@ header h1 {
     gap: 20px;
 }
 
-#setup-screen h2, #game-screen h2 {
+#setup-screen h2 {
     text-align: center;
     color: #495057;
     margin-bottom: 10px;
@@ -226,14 +226,95 @@ button {
     transform: translateY(-2px);
 }
 
-#new-game-btn {
+#back-to-main-btn {
     background: #dc3545;
     color: white;
 }
 
-#new-game-btn:hover {
+#back-to-main-btn:hover {
     background: #c82333;
     transform: translateY(-2px);
+}
+
+#round-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#round-header h2 {
+    margin: 0;
+    color: #495057;
+}
+
+#toggle-add-player-btn {
+    background: #6c757d;
+    color: white;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+}
+
+#toggle-add-player-btn:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+#mid-game-player-section {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+#mid-game-player-section h3 {
+    color: #495057;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+#mid-game-player-input {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+#mid-game-player-name {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+#mid-game-player-name:focus {
+    outline: none;
+    border-color: #2196F3;
+}
+
+#add-mid-game-player-btn {
+    background: #17a2b8;
+    color: white;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+}
+
+#add-mid-game-player-btn:hover {
+    background: #138496;
+    transform: translateY(-1px);
+}
+
+#mid-game-shortcut-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+#mid-game-shortcut-buttons .shortcut-btn {
+    font-size: 0.8rem;
+    padding: 6px 12px;
 }
 
 @media (max-width: 600px) {
@@ -250,6 +331,10 @@ button {
     }
     
     #controls {
+        flex-direction: column;
+    }
+    
+    #mid-game-player-input {
         flex-direction: column;
     }
 }
