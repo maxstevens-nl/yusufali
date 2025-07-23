@@ -1,3 +1,147 @@
+class GameManager {
+    static generateGameId() {
+        return 'game_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    static generateGameName(players) {
+        if (!players || players.length === 0) return 'New Game';
+        const playerNames = players.map(p => p.name).slice(0, 3);
+        if (players.length > 3) {
+            return `${playerNames.join(', ')} +${players.length - 3} more`;
+        }
+        return playerNames.join(', ');
+    }
+
+    static createGame(players, customName = null) {
+        const gameId = this.generateGameId();
+        const gameName = customName || this.generateGameName(players);
+        const now = Date.now();
+        
+        const gameData = {
+            id: gameId,
+            name: gameName,
+            createdAt: now,
+            lastModified: now,
+            players: players || [],
+            currentRound: 1,
+            gameStarted: false,
+            isCompleted: false,
+            currentRoundInputs: {}
+        };
+
+        return gameData;
+    }
+
+    static saveGame(gameData) {
+        try {
+            gameData.lastModified = Date.now();
+            const games = this.getAllGames();
+            const existingIndex = games.findIndex(g => g.id === gameData.id);
+            
+            if (existingIndex >= 0) {
+                games[existingIndex] = gameData;
+            } else {
+                games.push(gameData);
+            }
+            
+            localStorage.setItem('yusufali-games', JSON.stringify(games));
+            return true;
+        } catch (error) {
+            console.error('Error saving game:', error);
+            return false;
+        }
+    }
+
+    static loadGame(gameId) {
+        try {
+            const games = this.getAllGames();
+            return games.find(g => g.id === gameId) || null;
+        } catch (error) {
+            console.error('Error loading game:', error);
+            return null;
+        }
+    }
+
+    static getAllGames() {
+        try {
+            const gamesData = localStorage.getItem('yusufali-games');
+            if (!gamesData) return [];
+            
+            const games = JSON.parse(gamesData);
+            // Sort by lastModified timestamp, newest first
+            return games.sort((a, b) => b.lastModified - a.lastModified);
+        } catch (error) {
+            console.error('Error getting all games:', error);
+            return [];
+        }
+    }
+
+    static deleteGame(gameId) {
+        try {
+            const games = this.getAllGames();
+            const filteredGames = games.filter(g => g.id !== gameId);
+            localStorage.setItem('yusufali-games', JSON.stringify(filteredGames));
+            
+            // If this was the current game, clear current game reference
+            if (this.getCurrentGameId() === gameId) {
+                localStorage.removeItem('yusufali-current-game-id');
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Error deleting game:', error);
+            return false;
+        }
+    }
+
+    static setCurrentGame(gameId) {
+        localStorage.setItem('yusufali-current-game-id', gameId);
+    }
+
+    static getCurrentGameId() {
+        return localStorage.getItem('yusufali-current-game-id');
+    }
+
+    static getCurrentGame() {
+        const currentGameId = this.getCurrentGameId();
+        if (!currentGameId) return null;
+        return this.loadGame(currentGameId);
+    }
+
+    static migrateOldGameData() {
+        try {
+            // Check if old single-game data exists
+            const oldGameData = localStorage.getItem('yusufali-game-state');
+            if (!oldGameData) return false;
+
+            const oldGame = JSON.parse(oldGameData);
+            
+            // Convert old format to new format
+            const migratedGame = this.createGame(
+                oldGame.players || [],
+                'Migrated Game'
+            );
+            
+            migratedGame.currentRound = oldGame.currentRound || 1;
+            migratedGame.gameStarted = oldGame.gameStarted || false;
+            migratedGame.currentRoundInputs = oldGame.currentRoundInputs || {};
+            
+            // Save the migrated game
+            this.saveGame(migratedGame);
+            this.setCurrentGame(migratedGame.id);
+            
+            // Remove old data
+            localStorage.removeItem('yusufali-game-state');
+            
+            console.log('Successfully migrated old game data');
+            return true;
+        } catch (error) {
+            console.error('Error migrating old game data:', error);
+            return false;
+        }
+    }
+}
+
 class ScoreKeeper {
     constructor() {
         this.players = [];
@@ -32,7 +176,11 @@ class ScoreKeeper {
         this.addMidGamePlayerBtn = document.getElementById('add-mid-game-player-btn');
         this.toggleAddPlayerBtn = document.getElementById('toggle-add-player-btn');
         this.midGamePlayerSection = document.getElementById('mid-game-player-section');
-        this.backToMainBtn = document.getElementById('back-to-main-btn');
+        this.backToHomepageLink = document.getElementById('back-to-homepage-link');
+        this.gameListScreen = document.getElementById('game-list-screen');
+        this.gamesList = document.getElementById('games-list');
+        this.noGamesMessage = document.getElementById('no-games-message');
+        this.createNewGameBtn = document.getElementById('create-new-game-btn');
 
         this.init();
     }
@@ -45,19 +193,26 @@ class ScoreKeeper {
         this.createShortcutButtons();
         this.startGameBtn.addEventListener('click', () => this.startGame());
         this.submitRoundBtn.addEventListener('click', () => this.submitRound());
-        this.backToMainBtn.addEventListener('click', () => this.backToMain());
+        this.backToHomepageLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.backToHomepage();
+        });
+        this.createNewGameBtn.addEventListener('click', () => this.showSetupScreen());
         // Mid-game player controls will be initialized when game starts
         this.registerServiceWorker();
 
         // Load game state after DOM is ready
-        // Load game state after DOM is ready
-        console.log('About to load game state');
-        console.log('localStorage content:', localStorage.getItem('yusufali-game-state'));
-        this.loadGameState();
-        console.log('Game state loaded, gameStarted:', this.gameStarted, 'players:', this.players.length);
+        // Initialize the app
+        this.initializeApp();
     }
 
     saveGameState() {
+        const currentGameId = GameManager.getCurrentGameId();
+        if (!currentGameId) return;
+
+        const currentGame = GameManager.loadGame(currentGameId);
+        if (!currentGame) return;
+
         // Save current round inputs if game is active
         const currentRoundInputs = {};
         if (this.gameStarted) {
@@ -69,14 +224,14 @@ class ScoreKeeper {
             });
         }
 
-        const gameState = {
-            players: this.players,
-            currentRound: this.currentRound,
-            gameStarted: this.gameStarted,
-            currentRoundInputs: currentRoundInputs
-        };
-        console.log('Saving game state:', gameState);
-        localStorage.setItem('yusufali-game-state', JSON.stringify(gameState));
+        // Update the game data
+        currentGame.players = this.players;
+        currentGame.currentRound = this.currentRound;
+        currentGame.gameStarted = this.gameStarted;
+        currentGame.currentRoundInputs = currentRoundInputs;
+
+        console.log('Saving game state:', currentGame);
+        GameManager.saveGame(currentGame);
     }
 
     loadGameState() {
@@ -135,28 +290,182 @@ class ScoreKeeper {
         localStorage.removeItem('yusufali-game-state');
     }
 
-    backToMain() {
-        // Reset all game state
-        this.players = [];
-        this.currentRound = 1;
-        this.gameStarted = false;
-        this.midGameControlsInitialized = false;
-        this.roundNumber.textContent = '1';
-
-        // Hide game screen and show setup screen
-        this.gameScreen.classList.add('hidden');
-        this.setupScreen.classList.remove('hidden');
-        
-        // Reset UI
-        this.updatePlayerList();
-        this.updateStartButton();
-        
-        // Clear saved game state
-        this.clearGameState();
+    backToHomepage() {
+        // Save current game state before leaving
+        this.saveGameState();
         
         // Hide the add player section if it was open
         this.midGamePlayerSection.classList.add('hidden');
         this.toggleAddPlayerBtn.textContent = '+ Speler toevoegen';
+        
+        // Show game list screen (keep current game reference for resuming)
+        this.showGameListScreen();
+    }
+
+    initializeApp() {
+        // Try to migrate old data first
+        GameManager.migrateOldGameData();
+        
+        // Check if there's a current game to resume
+        const currentGame = GameManager.getCurrentGame();
+        if (currentGame && currentGame.gameStarted) {
+            this.loadGameFromData(currentGame);
+        } else {
+            this.showGameListScreen();
+        }
+    }
+
+    showGameListScreen() {
+        this.hideAllScreens();
+        this.gameListScreen.classList.remove('hidden');
+        this.renderGamesList();
+    }
+
+    showSetupScreen() {
+        this.hideAllScreens();
+        this.setupScreen.classList.remove('hidden');
+        // Reset setup screen state
+        this.players = [];
+        this.updatePlayerList();
+        this.updateStartButton();
+    }
+
+    showGameScreen() {
+        this.hideAllScreens();
+        this.gameScreen.classList.remove('hidden');
+    }
+
+    hideAllScreens() {
+        this.gameListScreen.classList.add('hidden');
+        this.setupScreen.classList.add('hidden');
+        this.gameScreen.classList.add('hidden');
+    }
+
+    renderGamesList() {
+        const games = GameManager.getAllGames();
+        
+        if (games.length === 0) {
+            this.gamesList.innerHTML = '';
+            this.noGamesMessage.classList.remove('hidden');
+            return;
+        }
+
+        this.noGamesMessage.classList.add('hidden');
+        
+        this.gamesList.innerHTML = games.map(game => this.createGameCard(game)).join('');
+        
+        // Add event listeners to game cards
+        games.forEach(game => {
+            const gameCard = document.querySelector(`[data-game-id="${game.id}"]`);
+            if (gameCard) {
+                gameCard.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('delete-game-btn')) {
+                        this.continueGame(game.id);
+                    }
+                });
+                
+                const deleteBtn = gameCard.querySelector('.delete-game-btn');
+                if (deleteBtn) {
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.deleteGame(game.id);
+                    });
+                }
+            }
+        });
+    }
+
+    createGameCard(game) {
+        const createdDate = new Date(game.createdAt).toLocaleDateString('nl-NL', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        const playerCount = game.players.length;
+        const playerNames = game.players.map(p => p.name).join(', ');
+        const status = game.isCompleted ? 'completed' : 'active';
+        const statusText = game.isCompleted ? 'Voltooid' : 'Actief';
+
+        return `
+            <div class="game-card" data-game-id="${game.id}">
+                <div class="game-card-main">
+                    <div class="game-card-info">
+                        <h3 class="game-name">${game.name}</h3>
+                        <div class="game-meta">
+                            <div class="game-meta-item">
+                                <span class="game-meta-label">Spelers:</span>
+                                <span class="game-meta-value">${playerCount}</span>
+                            </div>
+                            <div class="game-meta-item">
+                                <span class="game-meta-label">Ronde:</span>
+                                <span class="game-meta-value">${game.currentRound}</span>
+                            </div>
+                        </div>
+                        <div class="game-players">${playerNames}</div>
+                    </div>
+                </div>
+                
+                <div class="game-card-right">
+                    <span class="game-status ${status}">${statusText}</span>
+                    <div class="game-date">${createdDate}</div>
+                    <div class="game-actions">
+                        <button class="delete-game-btn" title="Verwijder spel">×</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    continueGame(gameId) {
+        const game = GameManager.loadGame(gameId);
+        if (!game) {
+            console.error('Game not found:', gameId);
+            return;
+        }
+
+        GameManager.setCurrentGame(gameId);
+        this.loadGameFromData(game);
+    }
+
+    loadGameFromData(gameData) {
+        this.players = gameData.players || [];
+        this.currentRound = gameData.currentRound || 1;
+        this.gameStarted = gameData.gameStarted || false;
+        this.roundNumber.textContent = this.currentRound;
+
+        if (this.gameStarted && this.players.length > 0) {
+            this.showGameScreen();
+            
+            // Initialize mid-game player controls
+            if (!this.midGameControlsInitialized) {
+                if (this.addMidGamePlayerBtn && this.midGamePlayerNameInput && this.toggleAddPlayerBtn) {
+                    this.addMidGamePlayerBtn.addEventListener('click', () => this.addMidGamePlayer());
+                    this.midGamePlayerNameInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') this.addMidGamePlayer();
+                    });
+                    this.toggleAddPlayerBtn.addEventListener('click', () => this.toggleAddPlayerSection());
+                    this.midGameControlsInitialized = true;
+                }
+            }
+            
+            this.createRoundInputs(false, gameData.currentRoundInputs);
+            this.createMidGameShortcutButtons();
+            this.updateScoreboard();
+        } else {
+            this.showSetupScreen();
+            this.updatePlayerList();
+            this.updateStartButton();
+        }
+    }
+
+    deleteGame(gameId) {
+        if (confirm('Weet je zeker dat je dit spel wilt verwijderen?')) {
+            GameManager.deleteGame(gameId);
+            this.renderGamesList();
+        }
     }
 
     addPlayer(nameOverride = null) {
@@ -282,10 +591,17 @@ class ScoreKeeper {
     startGame() {
         if (this.players.length < 2) return;
 
-        console.log('Starting game with players:', this.players);
+        // Create new game using GameManager
+        const gameData = GameManager.createGame(this.players, null);
+        gameData.gameStarted = true;
+        
+        // Save the game and set as current
+        GameManager.saveGame(gameData);
+        GameManager.setCurrentGame(gameData.id);
+        
+        console.log('Starting new game:', gameData);
         this.gameStarted = true;
-        this.setupScreen.classList.add('hidden');
-        this.gameScreen.classList.remove('hidden');
+        this.showGameScreen();
 
         // Initialize mid-game player controls (only if not already initialized)
         if (!this.midGameControlsInitialized) {
