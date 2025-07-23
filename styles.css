@@ -1,0 +1,255 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+#app {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    min-height: 100vh;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    color: white;
+    font-size: 2.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+#game-container {
+    display: grid;
+    grid-template-rows: 1fr auto auto;
+    gap: 20px;
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.hidden {
+    display: none !important;
+}
+
+#setup-screen, #game-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#setup-screen h2, #game-screen h2 {
+    text-align: center;
+    color: #495057;
+    margin-bottom: 10px;
+}
+
+#player-input {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#player-name {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+#player-name:focus {
+    outline: none;
+    border-color: #2196F3;
+}
+
+#shortcut-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.shortcut-btn {
+    background: #e9ecef;
+    color: #495057;
+    border: 2px solid #dee2e6;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shortcut-btn:hover {
+    background: #2196F3;
+    color: white;
+    border-color: #2196F3;
+    transform: translateY(-1px);
+}
+
+.player-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.remove-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+}
+
+#start-game-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+.score-input-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.score-input-row:last-child {
+    border-bottom: none;
+}
+
+.score-input-row label {
+    font-weight: 600;
+    flex: 1;
+}
+
+.score-input-row input {
+    width: 100px;
+    padding: 8px;
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.score-input-row input:focus {
+    outline: none;
+    border-color: #2196F3;
+}
+
+.scoreboard-table {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.scoreboard-row {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    gap: 15px;
+    padding: 12px 0;
+    border-bottom: 1px solid #dee2e6;
+    align-items: center;
+}
+
+.scoreboard-row:last-child {
+    border-bottom: none;
+}
+
+.scoreboard-row.leader {
+    background: linear-gradient(90deg, #ffd700, #ffed4e);
+    border-radius: 8px;
+    padding: 12px 15px;
+    font-weight: bold;
+}
+
+.rank {
+    font-weight: bold;
+    color: #6c757d;
+}
+
+.name {
+    font-weight: 600;
+}
+
+.score {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2196F3;
+}
+
+#controls {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+button {
+    padding: 12px 24px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+#add-player-btn, #start-game-btn, #submit-round-btn {
+    background: #28a745;
+    color: white;
+}
+
+#add-player-btn:hover, #start-game-btn:hover:not(:disabled), #submit-round-btn:hover {
+    background: #218838;
+    transform: translateY(-2px);
+}
+
+#new-game-btn {
+    background: #dc3545;
+    color: white;
+}
+
+#new-game-btn:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+    #app {
+        padding: 10px;
+    }
+    
+    header h1 {
+        font-size: 2rem;
+    }
+    
+    #game-container {
+        padding: 20px;
+    }
+    
+    #controls {
+        flex-direction: column;
+    }
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Youssef Ali</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2196F3">
+</head>
+<body>
+    <div id="app">
+        <main id="game-container">
+            <div id="setup-screen">
+                <h2>Add Players</h2>
+                <div id="player-input">
+                    <input type="text" id="player-name" placeholder="Enter player name or shortcut" maxlength="20">
+                    <button id="add-player-btn">Add Player</button>
+                </div>
+                <div id="shortcut-buttons"></div>
+                <div id="player-list"></div>
+                <button id="start-game-btn" disabled>Start Game</button>
+            </div>
+            
+            <div id="game-screen" class="hidden">
+                <div id="round-info">
+                    <h2>Round <span id="round-number">1</span></h2>
+                </div>
+                <div id="score-inputs"></div>
+                <div id="controls">
+                    <button id="submit-round-btn">Submit Round</button>
+                    <button id="new-game-btn">New Game</button>
+                </div>
+                <div id="scoreboard"></div>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
