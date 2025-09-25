@@ -1,3 +1,88 @@
+class Router {
+    constructor() {
+        this.routes = {
+            '': 'game-list',
+            'setup': 'setup',
+            'game': 'game'
+        };
+        this.currentRoute = '';
+        this.scoreKeeper = null;
+        
+        // Listen for popstate events (back/forward buttons)
+        window.addEventListener('popstate', (e) => {
+            this.handleRoute(e.state?.route || '');
+        });
+    }
+    
+    init() {
+        const hash = window.location.hash.substring(1);
+        const gameId = new URLSearchParams(window.location.search).get('game');
+        
+        if (gameId) {
+            // Check if the game exists before navigating to it
+            const game = GameManager.loadGame(gameId);
+            if (game) {
+                this.handleRoute('game', { gameId });
+            } else {
+                // Game doesn't exist, redirect to home and clean up URL
+                window.history.replaceState({}, '', '/');
+                this.handleRoute('');
+            }
+        } else {
+            this.handleRoute(hash || '');
+        }
+    }
+    
+    navigate(route, params = {}) {
+        if (route === 'game' && params.gameId) {
+            const url = `?game=${params.gameId}#game`;
+            window.history.pushState({ route: 'game', gameId: params.gameId }, '', url);
+            this.handleRoute('game', params);
+        } else {
+            const url = route ? `#${route}` : '/';
+            window.history.pushState({ route }, '', url);
+            this.handleRoute(route);
+        }
+    }
+    
+    handleRoute(route, params = {}) {
+        this.currentRoute = route;
+        
+        if (!this.scoreKeeper) return;
+        
+        switch (route) {
+            case 'setup':
+                this.scoreKeeper.showSetupScreen();
+                break;
+            case 'game':
+                if (params.gameId) {
+                    GameManager.setCurrentGame(params.gameId);
+                    this.scoreKeeper.loadGame(params.gameId);
+                }
+                this.scoreKeeper.showGameScreen();
+                break;
+            case '':
+            default:
+                this.scoreKeeper.showGameListScreen();
+                break;
+        }
+    }
+    
+    setScoreKeeper(scoreKeeper) {
+        this.scoreKeeper = scoreKeeper;
+        // Initialize routing now that ScoreKeeper is ready
+        this.init();
+    }
+    
+    back() {
+        if (this.currentRoute === 'game') {
+            this.navigate('');
+        } else if (this.currentRoute === 'setup') {
+            this.navigate('');
+        }
+    }
+}
+
 class GameManager {
     static generateGameId() {
         return 'game_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -148,6 +233,11 @@ class ScoreKeeper {
         this.currentRound = 1;
         this.gameStarted = false;
         this.midGameControlsInitialized = false;
+        this.penaltyRules = [
+            { threshold: 50, penalty: 50, label: 'Halve liter' },
+            { threshold: 40, penalty: 40, label: 'Bak 40' },
+            { threshold: 30, penalty: 30, label: 'Bak' }
+        ];
         this.nameShortcuts = {
             'koekje': 'Koekje',
             'timo': 'Slobbie',
@@ -182,6 +272,9 @@ class ScoreKeeper {
         this.noGamesMessage = document.getElementById('no-games-message');
         this.createNewGameBtn = document.getElementById('create-new-game-btn');
 
+        this.router = new Router();
+        this.router.setScoreKeeper(this);
+
         this.init();
     }
 
@@ -197,7 +290,7 @@ class ScoreKeeper {
             e.preventDefault();
             this.backToHomepage();
         });
-        this.createNewGameBtn.addEventListener('click', () => this.showSetupScreen());
+        this.createNewGameBtn.addEventListener('click', () => this.router.navigate('setup'));
         // Mid-game player controls will be initialized when game starts
         this.registerServiceWorker();
 
@@ -299,7 +392,7 @@ class ScoreKeeper {
         this.toggleAddPlayerBtn.textContent = '+ Speler toevoegen';
 
         // Show game list screen (keep current game reference for resuming)
-        this.showGameListScreen();
+        this.router.navigate('');
     }
 
     initializeApp() {
@@ -405,6 +498,10 @@ class ScoreKeeper {
     }
 
     continueGame(gameId) {
+        this.router.navigate('game', { gameId });
+    }
+
+    loadGame(gameId) {
         const game = GameManager.loadGame(gameId);
         if (!game) {
             console.error('Game not found:', gameId);
@@ -422,8 +519,6 @@ class ScoreKeeper {
         this.roundNumber.textContent = this.currentRound;
 
         if (this.gameStarted && this.players.length > 0) {
-            this.showGameScreen();
-
             // Initialize mid-game player controls
             if (!this.midGameControlsInitialized) {
                 if (this.addMidGamePlayerBtn && this.midGamePlayerNameInput && this.toggleAddPlayerBtn) {
@@ -440,7 +535,6 @@ class ScoreKeeper {
             this.createMidGameShortcutButtons();
             this.updateScoreboard();
         } else {
-            this.showSetupScreen();
             this.updatePlayerList();
             this.updateStartButton();
         }
@@ -586,7 +680,7 @@ class ScoreKeeper {
 
         console.log('Starting new game:', gameData);
         this.gameStarted = true;
-        this.showGameScreen();
+        this.router.navigate('game', { gameId: gameData.id });
 
         // Initialize mid-game player controls (only if not already initialized)
         if (!this.midGameControlsInitialized) {
@@ -631,7 +725,14 @@ class ScoreKeeper {
 
             // Add event listener to save state when input changes
             const input = document.getElementById(`score-${index}`);
-            input.addEventListener('input', () => this.saveGameState());
+            input.addEventListener('input', () => {
+                // Sync with scoreboard input
+                const scoreboardInput = document.getElementById(`scoreboard-score-${index}`);
+                if (scoreboardInput) {
+                    scoreboardInput.value = input.value;
+                }
+                this.saveGameState();
+            });
         });
     }
 
@@ -664,21 +765,87 @@ class ScoreKeeper {
         this.saveGameState();
     }
 
+    getPenaltyButton(player) {
+        const applicableRule = this.penaltyRules.find(rule => player.totalScore >= rule.threshold);
+        if (applicableRule) {
+            const className = `bak-btn bak-${applicableRule.penalty}`;
+            return `<button class="${className}" onclick="game.applyPenalty('${player.name}', ${applicableRule.penalty})">${applicableRule.label}</button>`;
+        }
+        return '<span class="bak-placeholder"></span>';
+    }
+
+    applyPenalty(playerName, penaltyPoints) {
+        if (!this.gameStarted) return;
+        
+        const player = this.players.find(p => p.name === playerName);
+        if (player && player.totalScore >= penaltyPoints) {
+            player.totalScore -= penaltyPoints;
+            this.updateScoreboard();
+            this.saveGameState();
+            console.log(`Penalty applied to ${playerName}: -${penaltyPoints} points (new total: ${player.totalScore})`);
+        }
+    }
+
+    // Backward compatibility method
+    bakPlayer(playerName) {
+        this.applyPenalty(playerName, 30);
+    }
+
     updateScoreboard() {
-        const sortedPlayers = [...this.players].sort((a, b) => b.totalScore - a.totalScore);
+        // Find the leader for highlighting
+        const leaderScore = this.players.length > 0 ? Math.max(...this.players.map(p => p.totalScore)) : 0;
 
         this.scoreboard.innerHTML = `
             <h3>Stand</h3>
             <div class="scoreboard-table">
-                ${sortedPlayers.map((player, index) => `
-                    <div class="scoreboard-row ${index === 0 ? 'leader' : ''}">
-                        <span class="rank">#${index + 1}</span>
+                 ${this.players.map((player, index) => `
+                    <div class="scoreboard-row ${player.totalScore === leaderScore && player.totalScore > 0 ? 'leader' : ''}">
                         <span class="name">${player.name}</span>
+                        ${this.getPenaltyButton(player)}
                         <span class="score">${player.totalScore}</span>
+                        <input type="number" class="scoreboard-input" id="scoreboard-score-${index}" placeholder="0" step="any" value="${this.getCurrentRoundInput(player.name)}">
                     </div>
                 `).join('')}
             </div>
         `;
+        
+        // Add event listeners to scoreboard inputs
+        this.players.forEach((player, index) => {
+            const input = document.getElementById(`scoreboard-score-${index}`);
+            if (input) {
+                input.addEventListener('input', () => this.updateScoreboardInput(player.name, input.value));
+            }
+        });
+    }
+
+    getCurrentRoundInput(playerName) {
+        // Check if there's a current round input saved for this player
+        if (this.currentRoundInputs && this.currentRoundInputs[playerName] !== undefined) {
+            return this.currentRoundInputs[playerName];
+        }
+        return '';
+    }
+
+    updateScoreboardInput(playerName, value) {
+        // Initialize currentRoundInputs if it doesn't exist
+        if (!this.currentRoundInputs) {
+            this.currentRoundInputs = {};
+        }
+        
+        // Update the current round input
+        this.currentRoundInputs[playerName] = value;
+        
+        // Also update the corresponding main score input
+        const playerIndex = this.players.findIndex(p => p.name === playerName);
+        if (playerIndex !== -1) {
+            const mainInput = document.getElementById(`score-${playerIndex}`);
+            if (mainInput) {
+                mainInput.value = value;
+            }
+        }
+        
+        // Save game state
+        this.saveGameState();
     }
 
     newGame() {

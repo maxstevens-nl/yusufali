@@ -18,15 +18,7 @@ body {
     margin: 0 auto;
 }
 
-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
 
-header h1 {
-    color: white;
-    font-size: 2.5rem;
-}
 
 #game-container {
     display: grid;
@@ -381,7 +373,7 @@ header h1 {
 
 .scoreboard-row {
     display: grid;
-    grid-template-columns: 40px 1fr auto;
+    grid-template-columns: 1fr auto auto auto;
     gap: 15px;
     padding: 12px 0;
     border-bottom: 1px solid #dee2e6;
@@ -405,6 +397,58 @@ header h1 {
     font-weight: bold;
     font-size: 1.1rem;
     color: #2196F3;
+}
+
+.bak-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.bak-btn:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+}
+
+/* Different colors for different penalty levels */
+.bak-50 {
+    background: #721c24;
+}
+
+.bak-50:hover {
+    background: #5a171c;
+}
+
+.bak-40 {
+    background: #a71e2a;
+}
+
+.bak-40:hover {
+    background: #8b1a21;
+}
+
+.bak-placeholder {
+    width: 1px;
+}
+
+.scoreboard-input {
+    width: 100px;
+    padding: 8px;
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.scoreboard-input:focus {
+    outline: none;
+    border-color: #2196F3;
 }
 
 #controls {
