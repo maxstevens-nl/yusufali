@@ -2,7 +2,7 @@
   "name": "yusufali",
   "private": true,
   "scripts": {
-    "dev": "bun --watch server.js",
+    "dev": "bun --hot server.js",
     "start": "bun server.js"
   },
   "devDependencies": {

@@ -40,7 +40,7 @@ async function serveStaticFile(pathname) {
 }
 
 Bun.serve({
-  port: 3001,
+  port: process.env.PORT ?? 3001,
   
   routes: {
     // Static assets

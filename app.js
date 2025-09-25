@@ -260,7 +260,6 @@ class ScoreKeeper {
         this.roundNumber = document.getElementById('round-number');
         this.scoreInputs = document.getElementById('score-inputs');
         this.submitRoundBtn = document.getElementById('submit-round-btn');
-        this.newGameBtn = document.getElementById('new-game-btn');
         this.scoreboard = document.getElementById('scoreboard');
         this.midGamePlayerNameInput = document.getElementById('mid-game-player-name');
         this.addMidGamePlayerBtn = document.getElementById('add-mid-game-player-btn');
