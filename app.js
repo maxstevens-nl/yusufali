@@ -149,7 +149,6 @@ class ScoreKeeper {
         this.gameStarted = false;
         this.midGameControlsInitialized = false;
         this.nameShortcuts = {
-            'max': 'Max',
             'koekje': 'Koekje',
             'timo': 'Slobbie',
             'hayo': 'Har',
@@ -158,7 +157,8 @@ class ScoreKeeper {
             'jur': 'Jur',
             'wessel': 'Wessel',
             'luuk': 'Luuk',
-            'joris': 'Joris'
+            'joris': 'Joris',
+            'max': 'Max',
         };
 
         this.setupScreen = document.getElementById('setup-screen');

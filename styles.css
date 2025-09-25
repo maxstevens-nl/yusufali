@@ -202,10 +202,6 @@ header h1 {
 }
 
 .game-actions {
-    opacity: 0;
-}
-
-.game-card:hover .game-actions {
     opacity: 1;
 }
 
@@ -218,9 +214,12 @@ header h1 {
     height: 30px;
     cursor: pointer;
     font-size: 14px;
+    line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    padding: 0;
 }
 
 .delete-game-btn:hover {
@@ -249,6 +248,7 @@ header h1 {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    padding-top: 48px;
 }
 
 #setup-screen h2 {
@@ -256,8 +256,6 @@ header h1 {
     color: #495057;
     margin-bottom: 20px;
 }
-
-
 
 #player-input {
     display: flex;
@@ -276,6 +274,13 @@ header h1 {
 #player-name:focus {
     outline: none;
     border-color: #2196F3;
+}
+
+.shortcut-text {
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin: 15px 0 10px 0;
 }
 
 #shortcut-buttons {
@@ -322,6 +327,15 @@ header h1 {
     cursor: pointer;
     font-size: 16px;
     line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.remove-btn:hover {
+    background: #c82333;
 }
 
 #start-game-btn:disabled {
@@ -515,6 +529,25 @@ button {
 #mid-game-shortcut-buttons .shortcut-btn {
     font-size: 0.8rem;
     padding: 6px 12px;
+}
+
+.score-inputs-header {
+    color: #495057;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 20px 0 15px 0;
+    text-align: center;
+}
+
+/* Hide number input spinners while keeping numeric keyboard on mobile */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
 }
 
 @media (max-width: 600px) {

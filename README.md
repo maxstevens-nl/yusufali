@@ -1,4 +1,4 @@
-# yusufali
+# Yusuf Ali Score Keeper
 
 To install dependencies:
 
