@@ -39,8 +39,10 @@ async function serveStaticFile(pathname) {
   }
 }
 
+const port = process.env.PORT || 3001;
+
 Bun.serve({
-  port: process.env.PORT ?? 3001,
+  port,
   
   routes: {
     // Static assets
@@ -118,4 +120,4 @@ Bun.serve({
   }
 });
 
-console.log("🚀 Server running on http://localhost:3001");
+console.log(`🚀 Server running on http://localhost:${port}`);

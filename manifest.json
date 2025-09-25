@@ -1,7 +1,7 @@
 {
-    "name": "Score Keeper",
-    "short_name": "ScoreKeeper",
-    "description": "Multi-player score tracking app",
+    "name": "Yusuf Ali",
+    "short_name": "Yusuf Ali",
+    "description": "Yusuf Ali",
     "start_url": "./",
     "display": "standalone",
     "background_color": "#ffffff",
