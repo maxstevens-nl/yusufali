@@ -154,14 +154,20 @@ class GameManager {
             gameData.lastModified = Date.now();
             const games = this.getAllGames();
             const existingIndex = games.findIndex(g => g.id === gameData.id);
+            
+            console.log('Saving game:', gameData.id, 'Existing index:', existingIndex, 'Total games before:', games.length);
+            console.log('Existing game IDs:', games.map(g => g.id));
 
             if (existingIndex >= 0) {
+                console.log('Updating existing game at index:', existingIndex);
                 games[existingIndex] = gameData;
             } else {
+                console.log('Adding new game');
                 games.push(gameData);
             }
 
             localStorage.setItem('yusufali-games', JSON.stringify(games));
+            console.log('Total games after save:', games.length);
             return true;
         } catch (error) {
             console.error('Error saving game:', error);
@@ -330,6 +336,9 @@ class ScoreKeeper {
     }
 
     saveGameState() {
+        // Only save game state if a game is actually started
+        if (!this.gameStarted) return;
+        
         const currentGameId = GameManager.getCurrentGameId();
         if (!currentGameId) return;
 
@@ -696,10 +705,19 @@ class ScoreKeeper {
     }
 
     startGame() {
+        console.log('startGame() called');
         if (this.players.length < 2) return;
+
+        // Prevent duplicate game creation
+        if (this.creatingGame) {
+            console.log('Already creating game, ignoring duplicate call');
+            return;
+        }
+        this.creatingGame = true;
 
         // Create new game using GameManager
         const gameData = GameManager.createGame(this.players, null);
+        console.log('Created new game with ID:', gameData.id);
         gameData.gameStarted = true;
 
         // Save the game and set as current
@@ -723,6 +741,9 @@ class ScoreKeeper {
         this.createMidGameShortcutButtons();
         this.updateScoreboard();
         this.saveGameState();
+        
+        // Reset the guard flag
+        this.creatingGame = false;
     }
 
 
@@ -772,6 +793,9 @@ class ScoreKeeper {
                 input.value = '';
             }
         });
+        
+        // Update submit button state after clearing inputs
+        this.updateSubmitButtonState();
         
         this.saveGameState();
     }
@@ -826,6 +850,9 @@ class ScoreKeeper {
                 input.addEventListener('input', () => this.updateScoreboardInput(player.name, input.value));
             }
         });
+        
+        // Update submit button state after rendering
+        this.updateSubmitButtonState();
     }
 
     getCurrentRoundInput(playerName) {
@@ -849,6 +876,25 @@ class ScoreKeeper {
         
         // Save game state
         this.saveGameState();
+        
+        // Update submit button state
+        this.updateSubmitButtonState();
+    }
+
+    updateSubmitButtonState() {
+        if (!this.submitRoundBtn || !this.gameStarted) return;
+        
+        // Check if any scoreboard input has a value
+        let hasAnyInput = false;
+        this.players.forEach((player, index) => {
+            const input = document.getElementById(`scoreboard-score-${index}`);
+            if (input && input.value.trim() !== '') {
+                hasAnyInput = true;
+            }
+        });
+        
+        // Enable/disable the submit button
+        this.submitRoundBtn.disabled = !hasAnyInput;
     }
 
     newGame() {

@@ -18,12 +18,7 @@ body {
     margin: 0 auto;
 }
 
-
-
 #game-container {
-    display: grid;
-    grid-template-rows: 1fr auto auto;
-    gap: 20px;
     background: white;
 }
 
@@ -36,7 +31,9 @@ body {
     display: flex;
     flex-direction: column;
     gap: 30px;
-    padding: 20px 0;
+    padding: 20px;
+    overflow-y: auto;
+    height: 100%;
 }
 
 #game-list-header {
@@ -87,6 +84,30 @@ body {
     font-weight: bold;
 }
 
+#game-list-screen {
+    position: relative;
+}
+
+#create-new-game-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999;
+}
+
+#game-list-actions {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+#game-list-actions #create-new-game-btn {
+    pointer-events: auto;
+}
+
 #games-container {
     min-height: 300px;
 }
@@ -100,7 +121,7 @@ body {
 
 .game-card {
     background: white;
-    padding: 16px 20px;
+    padding: 16px 0;
     cursor: pointer;
     position: relative;
     display: flex;
@@ -240,7 +261,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    padding-top: 48px;
+    padding: 48px 20px 20px 20px;
 }
 
 #setup-screen h2 {
@@ -611,12 +632,6 @@ input[type="number"] {
         font-size: 2rem;
     }
     
-    .game-card {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-    }
-    
     .game-card-main {
         flex-direction: column;
         align-items: stretch;
@@ -668,4 +683,17 @@ input[type="number"] {
 
 .floating-submit-btn:active {
     transform: translateY(0);
+}
+
+.floating-submit-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: 0 2px 6px rgba(108, 117, 125, 0.2);
+}
+
+.floating-submit-btn:disabled:hover {
+    background: #6c757d;
+    transform: none;
+    box-shadow: 0 2px 6px rgba(108, 117, 125, 0.2);
 }
