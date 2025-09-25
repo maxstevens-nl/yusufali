@@ -16,7 +16,7 @@ class GameManager {
         const gameId = this.generateGameId();
         const gameName = customName || this.generateGameName(players);
         const now = Date.now();
-        
+
         const gameData = {
             id: gameId,
             name: gameName,
@@ -37,13 +37,13 @@ class GameManager {
             gameData.lastModified = Date.now();
             const games = this.getAllGames();
             const existingIndex = games.findIndex(g => g.id === gameData.id);
-            
+
             if (existingIndex >= 0) {
                 games[existingIndex] = gameData;
             } else {
                 games.push(gameData);
             }
-            
+
             localStorage.setItem('yusufali-games', JSON.stringify(games));
             return true;
         } catch (error) {
@@ -66,7 +66,7 @@ class GameManager {
         try {
             const gamesData = localStorage.getItem('yusufali-games');
             if (!gamesData) return [];
-            
+
             const games = JSON.parse(gamesData);
             // Sort by lastModified timestamp, newest first
             return games.sort((a, b) => b.lastModified - a.lastModified);
@@ -81,12 +81,12 @@ class GameManager {
             const games = this.getAllGames();
             const filteredGames = games.filter(g => g.id !== gameId);
             localStorage.setItem('yusufali-games', JSON.stringify(filteredGames));
-            
+
             // If this was the current game, clear current game reference
             if (this.getCurrentGameId() === gameId) {
                 localStorage.removeItem('yusufali-current-game-id');
             }
-            
+
             return true;
         } catch (error) {
             console.error('Error deleting game:', error);
@@ -115,24 +115,24 @@ class GameManager {
             if (!oldGameData) return false;
 
             const oldGame = JSON.parse(oldGameData);
-            
+
             // Convert old format to new format
             const migratedGame = this.createGame(
                 oldGame.players || [],
                 'Migrated Game'
             );
-            
+
             migratedGame.currentRound = oldGame.currentRound || 1;
             migratedGame.gameStarted = oldGame.gameStarted || false;
             migratedGame.currentRoundInputs = oldGame.currentRoundInputs || {};
-            
+
             // Save the migrated game
             this.saveGame(migratedGame);
             this.setCurrentGame(migratedGame.id);
-            
+
             // Remove old data
             localStorage.removeItem('yusufali-game-state');
-            
+
             console.log('Successfully migrated old game data');
             return true;
         } catch (error) {
@@ -293,11 +293,11 @@ class ScoreKeeper {
     backToHomepage() {
         // Save current game state before leaving
         this.saveGameState();
-        
+
         // Hide the add player section if it was open
         this.midGamePlayerSection.classList.add('hidden');
         this.toggleAddPlayerBtn.textContent = '+ Speler toevoegen';
-        
+
         // Show game list screen (keep current game reference for resuming)
         this.showGameListScreen();
     }
@@ -305,7 +305,7 @@ class ScoreKeeper {
     initializeApp() {
         // Try to migrate old data first
         GameManager.migrateOldGameData();
-        
+
         // Check if there's a current game to resume
         const currentGame = GameManager.getCurrentGame();
         if (currentGame && currentGame.gameStarted) {
@@ -343,7 +343,7 @@ class ScoreKeeper {
 
     renderGamesList() {
         const games = GameManager.getAllGames();
-        
+
         if (games.length === 0) {
             this.gamesList.innerHTML = '';
             this.noGamesMessage.classList.remove('hidden');
@@ -351,9 +351,9 @@ class ScoreKeeper {
         }
 
         this.noGamesMessage.classList.add('hidden');
-        
+
         this.gamesList.innerHTML = games.map(game => this.createGameCard(game)).join('');
-        
+
         // Add event listeners to game cards
         games.forEach(game => {
             const gameCard = document.querySelector(`[data-game-id="${game.id}"]`);
@@ -363,7 +363,7 @@ class ScoreKeeper {
                         this.continueGame(game.id);
                     }
                 });
-                
+
                 const deleteBtn = gameCard.querySelector('.delete-game-btn');
                 if (deleteBtn) {
                     deleteBtn.addEventListener('click', (e) => {
@@ -384,33 +384,18 @@ class ScoreKeeper {
             minute: '2-digit'
         });
 
-        const playerCount = game.players.length;
         const playerNames = game.players.map(p => p.name).join(', ');
-        const status = game.isCompleted ? 'completed' : 'active';
-        const statusText = game.isCompleted ? 'Voltooid' : 'Actief';
 
         return `
             <div class="game-card" data-game-id="${game.id}">
                 <div class="game-card-main">
                     <div class="game-card-info">
-                        <h3 class="game-name">${game.name}</h3>
-                        <div class="game-meta">
-                            <div class="game-meta-item">
-                                <span class="game-meta-label">Spelers:</span>
-                                <span class="game-meta-value">${playerCount}</span>
-                            </div>
-                            <div class="game-meta-item">
-                                <span class="game-meta-label">Ronde:</span>
-                                <span class="game-meta-value">${game.currentRound}</span>
-                            </div>
-                        </div>
+                        <h3 class="game-name">${createdDate}</h3>
                         <div class="game-players">${playerNames}</div>
                     </div>
                 </div>
                 
                 <div class="game-card-right">
-                    <span class="game-status ${status}">${statusText}</span>
-                    <div class="game-date">${createdDate}</div>
                     <div class="game-actions">
                         <button class="delete-game-btn" title="Verwijder spel">×</button>
                     </div>
@@ -438,7 +423,7 @@ class ScoreKeeper {
 
         if (this.gameStarted && this.players.length > 0) {
             this.showGameScreen();
-            
+
             // Initialize mid-game player controls
             if (!this.midGameControlsInitialized) {
                 if (this.addMidGamePlayerBtn && this.midGamePlayerNameInput && this.toggleAddPlayerBtn) {
@@ -450,7 +435,7 @@ class ScoreKeeper {
                     this.midGameControlsInitialized = true;
                 }
             }
-            
+
             this.createRoundInputs(false, gameData.currentRoundInputs);
             this.createMidGameShortcutButtons();
             this.updateScoreboard();
@@ -594,11 +579,11 @@ class ScoreKeeper {
         // Create new game using GameManager
         const gameData = GameManager.createGame(this.players, null);
         gameData.gameStarted = true;
-        
+
         // Save the game and set as current
         GameManager.saveGame(gameData);
         GameManager.setCurrentGame(gameData.id);
-        
+
         console.log('Starting new game:', gameData);
         this.gameStarted = true;
         this.showGameScreen();

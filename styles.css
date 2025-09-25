@@ -6,7 +6,6 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     color: #333;
 }
@@ -17,7 +16,6 @@ body {
     min-height: 100vh;
     max-width: 800px;
     margin: 0 auto;
-    padding: 20px;
 }
 
 header {
@@ -28,7 +26,6 @@ header {
 header h1 {
     color: white;
     font-size: 2.5rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 
 #game-container {
@@ -36,9 +33,6 @@ header h1 {
     grid-template-rows: 1fr auto auto;
     gap: 20px;
     background: white;
-    border-radius: 15px;
-    padding: 30px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 
 .hidden {
@@ -85,7 +79,6 @@ header h1 {
     font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -115,13 +108,9 @@ header h1 {
 
 .game-card {
     background: white;
-    border: 2px solid #e9ecef;
-    border-radius: 8px;
     padding: 16px 20px;
     cursor: pointer;
-    transition: all 0.2s ease;
     position: relative;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -130,8 +119,6 @@ header h1 {
 
 .game-card:hover {
     border-color: #2196F3;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15);
 }
 
 .game-card-main {
@@ -216,7 +203,6 @@ header h1 {
 
 .game-actions {
     opacity: 0;
-    transition: opacity 0.2s ease;
 }
 
 .game-card:hover .game-actions {
@@ -235,7 +221,6 @@ header h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
 }
 
 .delete-game-btn:hover {
@@ -308,7 +293,6 @@ header h1 {
     border-radius: 20px;
     font-size: 0.9rem;
     cursor: pointer;
-    transition: all 0.2s ease;
 }
 
 .shortcut-btn:hover {
@@ -367,7 +351,6 @@ header h1 {
     padding: 8px;
     border: 2px solid #dee2e6;
     border-radius: 6px;
-    text-align: center;
     font-size: 1rem;
 }
 
@@ -393,13 +376,6 @@ header h1 {
 
 .scoreboard-row:last-child {
     border-bottom: none;
-}
-
-.scoreboard-row.leader {
-    background: linear-gradient(90deg, #ffd700, #ffed4e);
-    border-radius: 8px;
-    padding: 12px 15px;
-    font-weight: bold;
 }
 
 .rank {
@@ -429,7 +405,6 @@ button {
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.3s ease;
     font-weight: 600;
 }
 
@@ -455,7 +430,6 @@ button {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    transition: color 0.2s ease;
 }
 
 #back-to-homepage-link:hover {
@@ -481,7 +455,6 @@ button {
     padding: 8px 16px;
     font-size: 0.9rem;
     border-radius: 20px;
-    transition: all 0.2s ease;
 }
 
 #toggle-add-player-btn:hover {
@@ -545,16 +518,8 @@ button {
 }
 
 @media (max-width: 600px) {
-    #app {
-        padding: 10px;
-    }
-    
     header h1 {
         font-size: 2rem;
-    }
-    
-    #game-container {
-        padding: 20px;
     }
     
     #controls {
