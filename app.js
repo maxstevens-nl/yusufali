@@ -869,6 +869,29 @@ class ScoreKeeper {
             try {
                 const registration = await navigator.serviceWorker.register('./sw.js');
                 console.log('Service Worker registered:', registration);
+                
+                // Check for updates immediately
+                registration.update();
+                
+                // Listen for updates
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            console.log('New service worker available, reloading...');
+                            // Automatically reload to get the new version
+                            window.location.reload();
+                        }
+                    });
+                });
+                
+                // Also check for updates every time the app becomes visible
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden) {
+                        registration.update();
+                    }
+                });
+                
             } catch (error) {
                 console.log('Service Worker registration failed:', error);
             }
