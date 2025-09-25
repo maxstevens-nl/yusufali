@@ -51,7 +51,7 @@ Bun.serve({
       return new Response(file, {
         headers: {
           "Content-Type": "text/css",
-          "Cache-Control": "public, max-age=31536000"
+          "Cache-Control": "no-cache"
         }
       });
     },
@@ -61,7 +61,7 @@ Bun.serve({
       return new Response(file, {
         headers: {
           "Content-Type": "application/javascript",
-          "Cache-Control": "public, max-age=31536000"
+          "Cache-Control": "no-cache"
         }
       });
     },
@@ -102,8 +102,8 @@ Bun.serve({
     const url = new URL(req.url);
     const pathname = url.pathname;
     
-    // Try to serve static files first
-    if (pathname !== '/') {
+    // Try to serve static files first for any path that has a file extension
+    if (pathname.includes('.') || pathname !== '/') {
       const staticResponse = await serveStaticFile(pathname);
       if (staticResponse) {
         return staticResponse;
