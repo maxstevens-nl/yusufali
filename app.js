@@ -272,8 +272,8 @@ class ScoreKeeper {
         this.gameStarted = false;
         this.midGameControlsInitialized = false;
         this.penaltyRules = [
-            { threshold: 50, penalty: 50, label: 'Liter' },
-            { threshold: 40, penalty: 40, label: 'Halve liter' },
+            { threshold: 60, penalty: 60, label: 'Liter' },
+            { threshold: 45, penalty: 45, label: 'Halve liter' },
             { threshold: 30, penalty: 30, label: 'Bak' }
         ];
         this.nameShortcuts = {
