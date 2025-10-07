@@ -439,19 +439,19 @@ body {
 }
 
 /* Different colors for different penalty levels */
-.bak-50 {
+.bak-60 {
     background: #721c24;
 }
 
-.bak-50:hover {
+.bak-60:hover {
     background: #5a171c;
 }
 
-.bak-40 {
+.bak-45 {
     background: #a71e2a;
 }
 
-.bak-40:hover {
+.bak-45:hover {
     background: #8b1a21;
 }
 
